@@ -44,21 +44,43 @@
             document.getElementById("refresh-button").addEventListener("click", () => {
                 let start_date = this.from_calendar.datepicker('getDate');
                 let end_date = this.to_calendar.datepicker('getDate');
+                console.log('CHAR DRAWING [start_date='+start_date+'] [end_date='+end_date+']')
                 this.get_history(start_date, end_date);
             });
         }
 
         get_history(start_date, end_date) {
-            sorriso.DAL.get_history(start_date, end_date)
+            sorriso.DAL.get_smartdatanet_data_fromto_positiveonly(FEED_PRODUCTION,start_date, end_date)
                 .then(production_history => {
-                    this.production_history.set('area2.values', production_history['production']);
-                    this.production_history.set('area1.values', production_history['consumption']);
-                    this.production_history.set('recap', production_history['recap']);
+					//console.log('BARABAOMIAOMIAO ' + JSON.stringify(production_history));
+                    //this.production_history.set('area2.values', production_history.values);
+                    this.production_history.set('area1.values', production_history.values);
+                    //this.production_history.set('recap', production_history.values);
+                    
                 });
-            sorriso.DAL.get_lucciola_history(start_date, end_date)
-                .then(storage_history => {
-                    this.storage_history.set('values', storage_history);
+
+            sorriso.DAL.get_smartdatanet_data_fromto_positiveonly(FEED_LOAD,start_date, end_date)
+                .then(production_history => {
+					//console.log('BARABAOMIAOMIAO ' + JSON.stringify(production_history));
+                    this.production_history.set('area2.values', production_history.values);
+                    //this.production_history.set('area1.values', production_history.values);
+                    //this.production_history.set('recap', production_history.values);
+                    
                 });
+                
+            sorriso.DAL.get_smartdatanet_data_fromto_positiveonly(FEED_BATTERY,start_date, end_date)
+                .then(production_history => {
+					//console.log('BARABAOMIAOMIAO ' + JSON.stringify(production_history));
+                    this.storage_history.set('values', production_history.values);
+                    //this.production_history.set('area1.values', production_history.values);
+                    //this.production_history.set('recap', production_history.values);
+                    
+                });                
+                
+                
+                //FEED_PRODUCTION 
+                //FEED_LOAD
+
             win.sorriso.loadCompleted();
         }
     }
@@ -106,7 +128,7 @@
                     },
                     axis: {
                         y: {
-                            max: 3000,
+                            max: 8000,
                             padding: {top: 1},
                             tick: {
                                 values: [0]

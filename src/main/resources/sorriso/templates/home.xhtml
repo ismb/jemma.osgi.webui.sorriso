@@ -29,7 +29,7 @@
             {{/if}}
 
             <path fill="none" d="M57 80 L76 80 L76 61"/>
-            {{#if direct_consumption}}
+            {{#if producing_energy}}
             <path id="produzione2energia" class="wire" fill="none" stroke-linecap="round" stroke-dasharray="0.25,1.5" d="M57 80 L76 80 L76 61"/>
             {{/if}}
         </svg>
@@ -71,15 +71,15 @@
     </div>
     <div class="row" id="home-second-row">
         <div class="col-xs-6 col-md-3">
-            <h3>AUTOCONSUMO<br/> DI QUESTA SETTIMANA</h3>
+            <h3>AUTOCONSUMO<br/> ISTANTANEO</h3>
             <div id="home-weekly-consume"></div>
         </div>
         <div class="col-xs-6 col-md-3">
-            <h3>SPESA<br/> DI QUESTA SETTIMANA</h3>
+            <h3>SPESA<br/> ISTANTANEA ORARIA STIMATA</h3>
             <div id="home-weekly-expense"></div>
         </div>
         <div class="col-xs-12 col-md-6 home-graph" style="overflow:hidden">
-            <h3>FOTOVOLTAICO - CONFRONTO PREVISIONI/PRODUZIONE</h3>
+            <h3>FOTOVOLTAICO - CONFRONTO PREVISIONI/PRODUZIONE (ultima ora)</h3>
             <div id="home-solar-graph"></div>
         </div>
     </div>

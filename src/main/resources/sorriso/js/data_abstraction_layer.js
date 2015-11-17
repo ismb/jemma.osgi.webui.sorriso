@@ -14,13 +14,13 @@
             this._init_websocket(JEMMA_WSOCKET_URL);
 
             /* This is to generate random news, can be removed */
-            setInterval(() => {
+            /*setInterval(() => {
                 this.wsock.send(JSON.stringify({
                     msg: 'HELLO',
                     date: '2015-01-01T18:17:30Z',
                     type: (Math.random() > 0.5 ? 'news' : 'alarm')
                 }));
-            }, 5000);
+            }, 5000);*/
         }
 
         _init_websocket(endpoint) {
@@ -94,6 +94,125 @@
             device.location = "STUB LOCATION";
             return device;
         }
+        
+        _sdnget_ajax_call(myurl, params, type = 'GET') {
+            return new Promise(
+                (resolve, reject) => {
+                    var api_url = myurl;
+                    var api_params = JSON.stringify(params);
+
+                    //sorriso.log('SDP', `ENTERING _sdnget_ajax_call ${api_url} : ${api_params}`);
+                    $.ajax({
+                        type: type,
+                        url: api_url,
+                        data: api_params,
+                        dataType: "json",
+                        processData: false,
+                        headers: {Authorization : "Bearer " + SMARTDATANET_TOKEN},
+                        contentType: 'application/json'
+                    })
+                        .done(response => {
+                            //sorriso.log('SDP', `RESPONSING ${response.code} _sdnget_ajax_call: ${JSON.stringify(response)}`);
+                            resolve(response);
+                        })
+                        .fail(response => {
+                            reject({
+                                code: -1,
+                                message: 'DALSDP Unable to contact server',
+                                error: response
+                            });
+                        })
+                });
+        }                
+        
+        get_smartdatanet_data_latest(feedparams){
+			//sorriso.log('SDP','DAL home get_smartdatanet_data');
+			
+			return this._sdnget_ajax_call(feedparams.url + SUFFIX_LATEST, null).then( response => {
+				//sorriso.log('SDP','DAL response ' + JSON.stringify(response));
+				var val=response.d.results[0][feedparams.paramname];
+				//sorriso.log('SDP','DAL myresponse ' + JSON.stringify(myresponse));
+				
+				var myperc = (100 * val) / feedparams.max_feed_value;
+				
+				var myresponse = {
+                    level: val,
+                    unit: feedparams.unit,
+                    percentage: myperc
+                }
+				
+				return {'values' : myresponse};
+				}
+			)
+		}
+		
+        get_smartdatanet_data_latestn(feedparams,n){
+			//sorriso.log('LATESTN','DAL home get_smartdatanet_data');
+			var suffix = SUFFIX_LATESTN
+			suffix = suffix.replace('N',n);
+			return this._sdnget_ajax_call(feedparams.url + suffix, null).then( response => {
+				//sorriso.log('LATESTN','DAL response ' + JSON.stringify(response));
+				var results = response.d.results;
+				//sorriso.log('LATESTN','DAL response ' + JSON.stringify(results));
+				
+				var myprevision = [];
+				var myactual = [];
+				
+				for (var r in results) {
+					//sorriso.log('LATESTN','DAL response ' + JSON.stringify(results[r]));
+					var myvalue = results[r][feedparams.paramname]
+					//sorriso.log('LATESTN','DAL response ' + myvalue);
+					//note: these are percentages
+					var myperc = (100 * myvalue) / feedparams.max_feed_value;
+					myactual[r] = myperc
+					myprevision[r] = myperc
+					}
+
+				var  myresponse = {
+                    prevision: myprevision,
+                    actual: myactual
+                }
+				
+				return {'values' : myresponse};
+				}
+			)
+		}		
+		
+		
+		
+        get_smartdatanet_data_fromto_positiveonly(feedparams,from,to){
+			//sorriso.log('CHAR DRAWING','DAL home get_smartdatanet_data');
+			var myfrom= from.getFullYear() +'-' + (from.getMonth()+1) + '-' + from.getDate() + 'T0:0:0%2B00:00'
+			var myto= to.getFullYear() +'-' + (to.getMonth()+1) + '-' + to.getDate() + 'T23:59:0%2B00:00'
+			var suffix = SUFFIX_FROMTO
+			suffix = suffix.replace('DATEFROM',myfrom);
+			suffix = suffix.replace('DATETO',myto);
+			sorriso.log('CHAR DRAWING','DAL suffic ' + suffix);
+			return this._sdnget_ajax_call(feedparams.url + suffix, null).then( response => {
+				//sorriso.log('LATESTN','DAL response ' + JSON.stringify(response));
+				var results = response.d.results;
+				//sorriso.log('CHAR DRAWING','DAL response ' + JSON.stringify(results));
+				
+				let myresponse = [];
+				
+				for (var r in results) {
+					//sorriso.log('LATESTN','DAL response ' + JSON.stringify(results[r]));
+					var myvalue = results[r][feedparams.paramname]
+					
+					//warning: don'use on negative data !!!
+					if(myvalue<0){
+						myvalue=0;
+					}
+					//sorriso.log('LATESTN','DAL response ' + myvalue);
+					//note: these are percentages
+					myresponse[r]=myvalue;
+					}
+				
+				return {'values' : myresponse};
+				}
+			)
+		}				
+		
 
         get_devices() {
             /**
@@ -126,7 +245,6 @@
             /**
              * Used to populate HOME page diagram with current data.
              *
-             * Status: HALF -> Lucciola and Energy values are fakes.
              */
             return this.get_devices().then(resp => {
                 let production = null;
@@ -257,12 +375,12 @@
              * The returned value is expected to be an object in the form
              * { date: DATE, msg: TEXT, type: [news|alarm] }
              *
-             * Status: HALF -> Listens on a websocket where fake data is injected.
+             * Status: HALF -> Listens on a websocket where data is injected.
              */
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 onnews_callback({
                     date: new Date(),
-                    msg: 'NEWS! ' + i,
+                    msg: 'Benvenuto Utente SORRISO!',
                     type: (Math.random() > 0.5 ? 'news' : 'alarm')
                 });
             }
@@ -403,7 +521,6 @@
              * each device should have level, unit, percentage, location and type_label values added
              * to the get_devices() response.
              *
-             * Status: HALF -> Device type is currently fake and _stub_data is used to fill data.
              */
             const TYPE_MAP = {
                 'smart_plug': 1,

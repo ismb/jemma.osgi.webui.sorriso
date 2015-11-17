@@ -13,11 +13,11 @@
                     <div id="consumption-widget">
                         <img id="consumption-widget-wings" src="img/consumption/wings.png"/>
                         <img id="consumption-widget-icon" src="img/consumption/consumi.png"/>
-                        <div id="consumption-widget-others" class="consumption-widget-small" decorator="progress:{{value.others.percentage}}">
-                            <div class="consumption-widget-label"><div>Altro</div></div>
+                        <div id="consumption-widget-others" class="GRID-widget-small" decorator="progress:{{value.others.percentage}}">
+                            <div class="consumption-widget-label"><div>Grid</div></div>
                         </div>
                         <div id="consumption-widget-devices" class="consumption-widget-medium" decorator="progress:{{value.devices.percentage}}">
-                            <div class="consumption-widget-label"><div>Dispositivi</div></div>
+                            <div class="consumption-widget-label"><div>Autoconsumo</div></div>
                         </div>
                         <div id="consumption-widget-total" class="consumption-widget-large" decorator="progress:{{value.total.percentage}}">
                             <div class="consumption-widget-label"><div>Totale</div></div>
@@ -35,11 +35,11 @@
                             <div id="total-consumption" class="consumption-valuebox"></div>
                         </div>
                         <div class="col-md-4">
-                            <h3>DISPOSITIVI REGISTRATI</h3>
+                            <h3>QUOTA DI AUTOCONSUMO</h3>
                             <div id="devices-consumption" class="consumption-valuebox"></div>
                         </div>
                         <div class="col-md-4">
-                            <h3>ALTRI DISPOSITIVI</h3>
+                            <h3>QUOTA DA GRID</h3>
                             <div id="others-consumption" class="consumption-valuebox"></div>
                         </div>
                     </div>
@@ -49,21 +49,21 @@
         <div class="col-md-4 hidden-sm" id="consumption-right-side">
             <div class="consumption-first-row" id="consumption-balance">
                 <div>
-                    <h3>SPESA ISTANTANEA</h3>
+                    <h3>SPESA ORARIA ISTANTANEA STIMATA</h3>
                     <div class="consumption-balance-value">
                         <div id="consumption-instant-expense-bar"></div>
                         <div id="consumption-instant-expense" class="consumption-valuebox"></div>
                     </div>
                 </div>
                 <div>
-                    <h3>SPESA DI QUESTA SETTIMANA</h3>
+                    <h3>SPESA SETTIMANALE ISTANTANEA STIMATA</h3>
                     <div class="consumption-balance-value">
                         <div id="consumption-weekly-expense-bar"></div>
                         <div id="consumption-weekly-expense" class="consumption-valuebox"></div>
                     </div>
                 </div>
                 <div>
-                    <h3>RISPARMIO DI QUESTA SETTIMANA</h3>
+                    <h3>RISPARMIO ISTANTANEO STIMATO</h3>
                     <div class="consumption-balance-value">
                         <div id="consumption-weekly-saving-bar"></div>
                         <div id="consumption-weekly-saving" class="consumption-valuebox"></div>
