@@ -16,30 +16,7 @@
         get_devices() {
             sorriso.DAL.get_devices_with_consumption()
                 .then(devices => {
-                    let cache = this.devices_history_cache;
-                    let cache_last_update = this.devices_history_cache.last_update;
-
-                    return Promise.all(function *() {
-                        if (sorriso.cache_is_expired('LONG_TERM_EXPIRATION', cache_last_update)) {
-                            for (let device of devices) {
-                                yield sorriso.DAL.get_device_sevendays_history(device)
-                                    .then((device_history) => {
-                                        cache.last_update = moment();
-                                        cache.entries[device.device['dal.device.UID']] = device_history;
-                                        device.history = device_history;
-                                        return device;
-                                    });
-                            }
-                        }
-                        else {
-                            for (let device of devices) {
-                                device.history = cache.entries[device.device['dal.device.UID']];
-                                yield device;
-                            }
-                        }
-                    }());
-                })
-                .then(devices => {
+					//sorriso.log('MYDEVICES','devices ' + JSON.stringify(devices))
                     this.devices.set('devices', devices);
                     win.sorriso.loadCompleted();
                     setTimeout(() => {
@@ -84,10 +61,11 @@
         },
         decorators: {
             status: function (node, status) {
-                $(node).bootstrapSwitch({
+                var a = $(node).bootstrapSwitch({
                     size: "small",
                     state: status
                 });
+                
                 return {
                     update: function (status) {
                         $(node).bootstrapSwitch("state", status);

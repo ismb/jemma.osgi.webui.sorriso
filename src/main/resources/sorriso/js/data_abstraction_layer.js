@@ -75,23 +75,30 @@
                 });
         }
 
-        _call_function(device_dal_uid, type, action) {
-            return this._ajax_call(`devices/${device_dal_uid}/functions`).then(result => {
-                for (let function_type of result) {
-                    if (function_type['dal.function.type'] === type) {
-                        return this._ajax_call(`functions/${function_type['dal.function.UID']}`,
+        _mycall_function(device_dal_uid, function_uid, action) {
+			sorriso.log('MYDEVICES','calling devices/' + device_dal_uid + ':' + function_uid)
+			return this._ajax_call('functions/'+ device_dal_uid + ':' + function_uid,
                             {operation: action},
                             'POST'
                         );
-                    }
+        }
+
+        _call_function(device_dal_uid, type, action) {
+			sorriso.log('MYDEVICES','calling devices/' + device_dal_uid + '/functions')
+            return this._ajax_call(`devices/${device_dal_uid}/functions`).then(result => {
+                for (let function_type of result) {
+                       return this._ajax_call(`functions/${function_type['dal.function.UID']}`,
+                            {operation: action},
+                            'POST'
+                        );
                 }
-                throw {code: -2, message: 'Unable to find device function type', error: {}};
+                throw {code: -2, message: 'Unable to find device function type on call to ' + device_dal_uid, error: {}};
             });
         }
 
         _stub_data(device) {
-            device.level = Math.ceil(Math.random() * 1000);
-            device.location = "STUB LOCATION";
+			
+            device.location = "Studio";
             return device;
         }
         
@@ -165,7 +172,7 @@
 					//note: these are percentages
 					var myperc = (100 * myvalue) / feedparams.max_feed_value;
 					myactual[r] = myperc
-					myprevision[r] = myperc
+					myprevision[r] = myperc + 0.1*Math.random()*myperc //demo purposes only - the commercial i-em service can be hooked here
 					}
 
 				var  myresponse = {
@@ -227,6 +234,7 @@
                     promises.push(
                         this._ajax_call(`devices/${device['dal.device.UID']}/functions`)
                             .then(resp => {
+								//sorriso.log('MYDEVICES','device ' + JSON.stringify(resp))
                                 return {
                                     name: device['dal.device.name'],
                                     device: device,
@@ -266,7 +274,7 @@
 
                 return {'production': production, 'consumption': consumption};
             }).then((devices) => {
-                let power_production = this._call_function(devices.production['dal.device.UID'], 'power', 'getCurrent')
+                let power_production = this._call_function(devices.production['dal.device.UID'], 'EnergyMeter', 'getCurrent')
                     .then(resp => {
                         return {
                             production: {
@@ -277,7 +285,7 @@
                         };
                     }
                 );
-                let power_consumption = this._call_function(devices.consumption['dal.device.UID'], 'power', 'getCurrent')
+                let power_consumption = this._call_function(devices.consumption['dal.device.UID'], 'EnergyMeter', 'getCurrent')
                     .then(resp => {
                         return {
                             consumption: {
@@ -513,6 +521,10 @@
                 resolve(values);
             });
         }
+        
+        switchclick(id) {
+			this._mycall_function(id, 'OnOff', 'reverse')
+		}
 
         get_devices_with_consumption() {
             /**
@@ -531,24 +543,41 @@
                 .then(response => {
                     let promises = [];
                     for (let device of response) {
-                        switch (device.device["ah.category.pid"]) {
-
-                            case 13:
+						var mydevice = device.device
+						//sorriso.log('MYDEVICES','cyrcling devices ' + JSON.stringify(mydevice))
+						var pid = mydevice["ah.category.pid"]
+						var myuid = mydevice["dal.function.device.UID"]
+						sorriso.log('MYDEVICES','pid ' + pid + ' myuid==' + myuid)
+											
+						
+						//uid check to avoid considering defective plug in demo room
+                        if ((pid == 1 || pid == 13) && (myuid!="ZigBee:ah.app.5149012995480293-1") && (myuid!="ZigBee:ah.app.5149012995480293-2") ) {
+								sorriso.log('MYDEVICES','SMART PLUG ' + pid)
                                 device.type = TYPE_MAP['smart_plug'];
-                                promises.push(this._call_function(device.device['dal.device.UID'], 'power', 'getCurrent').then(resp=> {
+                                device.type_label = "SMART PLUG";
+                                                                
+                                var mypromise = this._call_function(device.device['dal.device.UID'], 'EnergyMeter', 'getCurrent').then(resp=> {
+									sorriso.log('MYRESP','resp ' + JSON.stringify(resp))
                                     device.level = resp.level;
-                                    device = this._stub_data(device); //JUST FOR TESTING PURPOSE
-                                    device.unit = resp.unit;
+                                    device = this._stub_data(device)
                                     device.percentage = Math.ceil(device.level / MAXIMUM_POWER * 100);
-                                    device.type_label = "SMART PLUG";
-                                    device.active = Math.random() >= 0.5;
+                                    if(device.level > 0)
+										device.active = true;
+                                    else
+										device.active = false;
+                                    device.unit = resp.unit;
+                                    device.click = function(event) {alert('sooka')}
+                                    
                                     return device
-                                }));
-                                break;
-
-                            case 12:
+                                })
+                                
+                                promises.push(mypromise);
+                                
+                                
+                        } else if (pid == 12) {
+								sorriso.log('MYDEVICES','CONTATORE ' + pid)
                                 device.type = TYPE_MAP['counter'];
-                                promises.push(this._call_function(device.device['dal.device.UID'], 'power', 'getCurrent').then(resp=> {
+                                promises.push(this._call_function(device.device['dal.device.UID'], 'EnergyMeter', 'getCurrent').then(resp=> {
                                     device.level = resp.level;
                                     device = this._stub_data(device); //JUST FOR TESTING PURPOSE
                                     device.unit = resp.unit;
@@ -557,12 +586,11 @@
                                     return device
 
                                 }));
-                                break;
+						} else if (37 == 11) {
 
-                            case 34:
-                            case 11: //just for testing purpose, remove when api give lucciola
+								sorriso.log('MYDEVICES','BATTERY ' + pid)
                                 device.type = TYPE_MAP['battery'];
-                                promises.push(this._call_function(device.device['dal.device.UID'], 'power', 'getCurrent').then(resp=> {
+                                promises.push(this._call_function(device.device['dal.device.UID'], 'EnergyMeter', 'getCurrent').then(resp=> {
                                     resp = {level: 100, unit: '%', percentage: 100};
                                     device = this._stub_data(device); //JUST FOR TESTING PURPOSE
                                     device.level = resp.level;
@@ -572,16 +600,14 @@
                                     return device
 
                                 }));
-                                break;
-
-                            default:
+						} else {
                                 promises.push(
                                     new Promise((resolve, reject) => {
                                         device.type = 4;
                                         device.type_label = "SCONOSCIUTO";
                                         resolve(device);
                                     }));
-                                break;
+				
                         }
                     }
 

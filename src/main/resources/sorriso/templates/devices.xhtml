@@ -104,15 +104,15 @@
                 <div class="widget-label">
                     Stato:
                 </div>
-                <div class="status-switch-container">
-                    <input type="checkbox" decorator="status:{{device.active}}">
+                <div class="status-switch-container"> 
+                    <label onclick="sorriso.DAL.switchclick({{JSON.stringify(device.device['dal.device.UID'])}})" ><input type="checkbox" decorator="status:{{device.active}}"></label>
                 </div>
             </div>
         </div>
         {{/if}}
-        <img class="history-icon" src="{{history_icon(history_view)}}"/>
+        <!--<img class="history-icon" src="{{history_icon(history_view)}}"/>
         <img class="history-button" src="{{history_button(history_view)}}"
-             on-click="set('history_view', !history_view)"/>
+             on-click="set('history_view', !history_view)"/>-->
     </div>
     ]]>
 </script>
@@ -183,9 +183,9 @@
             </div>
         </div>
         {{/if}}
-        <img class="history-icon" src="{{history_icon(history_view)}}"/>
+        <!--<img class="history-icon" src="{{history_icon(history_view)}}"/>
         <img class="history-button" src="{{history_button(history_view)}}"
-             on-click="set('history_view', !history_view)"/>
+             on-click="set('history_view', !history_view)"/>-->
     </div>
     ]]>
 </script>
@@ -266,9 +266,9 @@
             </div>
         </div>
         {{/if}}
-        <img class="history-icon" src="{{history_icon(history_view)}}"/>
+        <!--<img class="history-icon" src="{{history_icon(history_view)}}"/>
         <img class="history-button" src="{{history_button(history_view)}}"
-             on-click="set('history_view', !history_view)"/>
+             on-click="set('history_view', !history_view)"/>-->
     </div>
     ]]>
 </script>

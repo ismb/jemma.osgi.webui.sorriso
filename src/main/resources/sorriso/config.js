@@ -1,6 +1,14 @@
 // global values
-JEMMA_API_URL = "http://axantlabs.com:8080/api";
-JEMMA_WSOCKET_URL = "ws://echo.websocket.org";
+JEMMA_API_URL = "http://127.0.0.1:8888/api";
+JEMMA_WSOCKET_URL = "ws://127.0.0.1:8888/ws";
+
+//JEMMA_API_URL = "http://rtsm-local-hag:8080/api";
+//JEMMA_WSOCKET_URL = "ws://rtsm-local-hag:8080/ws";
+
+//JEMMA_API_URL = "http://axantlabs.com:8080/api";
+//JEMMA_WSOCKET_URL = "ws://echo.websocket.org";
+
+
 DEBUG = true;
 SMARTDATANET_TOKEN="wi4hj5qinQEnh19zSBPrH6ZJJTAa"
 
